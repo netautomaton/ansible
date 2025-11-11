@@ -1,0 +1,28 @@
+- name: "Multiple Interface Dynamic Playbook"
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    netbox_url: http://localhost:8000
+    netbox_token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
+
+  tasks:
+    - name: "Create list of interfaces to create"
+      set_fact:
+        data: "{{ data | d([]) + [{'name': name, 'device': device, 'type': type}] }}"
+      vars:
+        name: "Ethernet{{ item }}/1"
+        device: 1
+        type: other
+      loop: "{{ range(1, 11) | list }}"
+
+    - name: "Create interfaces from dynamic list"
+      ansible.builtin.uri:
+        url: "{{ netbox_url }}/api/dcim/interfaces/"
+        method: POST
+        headers:
+          Authorization: "Token {{ netbox_token }}"
+        body_format: json
+        body: "{{ data }}"
+        status_code: 201
+      register: output

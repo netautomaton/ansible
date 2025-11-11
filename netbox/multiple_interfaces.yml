@@ -1,0 +1,25 @@
+- name: "Multiple Interface Playbook"
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    netbox_url: http://localhost:8000
+    netbox_token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
+
+  tasks:
+    - name: "Create multiple interfaces"
+      ansible.builtin.uri:
+        url: "{{ netbox_url }}/api/dcim/interfaces/"
+        method: POST
+        headers:
+          Authorization: "Token {{ netbox_token }}"
+        body_format: json
+        body:
+        - device: 1
+          name: Ethernet1/1
+          type: other
+        - device: 1
+          name: Ethernet2/1
+          type: other
+        status_code: 201
+      register: output

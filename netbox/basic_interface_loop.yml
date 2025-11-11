@@ -1,0 +1,19 @@
+- name: "Basic Interface Playbook"
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    netbox_url: http://localhost:8000
+    netbox_token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
+
+  tasks:
+    - name: Create interface with only required information
+      netbox.netbox.netbox_device_interface:
+        netbox_url: "{{ netbox_url }}"
+        netbox_token: "{{ netbox_token }}"
+        data:
+          device: test-sw-01
+          name: "Ethernet{{ item }}/1"
+          type: Other
+        state: present
+      loop: "{{ range(1, 11) | list }}"
